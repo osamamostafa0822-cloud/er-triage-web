@@ -24,5 +24,7 @@
   "waitWarning": "Warning",
   "waitCritical": "Critical",
   "retry": "Retry",
-  "loading": "Loading"
+  "loading": "Loading",
+  "apiNetworkError": "The server cannot be reached.",
+  "apiRequestFailed": "The request could not be completed (HTTP {status})."
 }

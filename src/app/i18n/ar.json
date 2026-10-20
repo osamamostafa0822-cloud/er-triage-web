@@ -24,5 +24,7 @@
   "waitWarning": "تحذير",
   "waitCritical": "انتظار حرج",
   "retry": "إعادة المحاولة",
-  "loading": "جارٍ التحميل"
+  "loading": "جارٍ التحميل",
+  "apiNetworkError": "تعذّر الاتصال بالخادم.",
+  "apiRequestFailed": "تعذّر إكمال الطلب (HTTP {status})."
 }

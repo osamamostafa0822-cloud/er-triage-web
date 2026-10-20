@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { LoadingService } from './core/http/loading.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -21,6 +22,23 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('ER Triage Board');
     expect(compiled.querySelector('router-outlet')).not.toBeNull();
+  });
+
+  it('connects global loading to the visible indicator and main content accessibility state', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const loading = TestBed.inject(LoadingService);
+    expect(element.querySelector('main')?.getAttribute('aria-busy')).toBe('false');
+    expect(element.querySelector('.loading-track')).toBeNull();
+    const finish = loading.beginRequest();
+    await fixture.whenStable();
+    expect(element.querySelector('main')?.getAttribute('aria-busy')).toBe('true');
+    expect(element.querySelector('.loading-track')).not.toBeNull();
+    finish();
+    await fixture.whenStable();
+    expect(element.querySelector('main')?.getAttribute('aria-busy')).toBe('false');
+    expect(element.querySelector('.loading-track')).toBeNull();
   });
 
   it('switches translations and document direction between Arabic and English', async () => {

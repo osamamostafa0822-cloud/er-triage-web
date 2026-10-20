@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { TranslationService } from '../../i18n/translation.service';
+import type { TriagePriority } from '../../core/models/patient';
 
-export type Priority = 1 | 2 | 3 | 4;
+export type Priority = TriagePriority;
 
 @Component({
   selector: 'app-priority-badge',

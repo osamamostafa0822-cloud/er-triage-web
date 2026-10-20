@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { TranslationService } from '../../i18n/translation.service';
+import type { WaitingLevel } from '../../core/models/triage-board';
 
-export type WaitingLevel = 'None' | 'Normal' | 'Warning' | 'Critical';
+export type { WaitingLevel } from '../../core/models/triage-board';
 
 @Component({
   selector: 'app-waiting-indicator',

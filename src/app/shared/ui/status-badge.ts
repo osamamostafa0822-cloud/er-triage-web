@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { TranslationService } from '../../i18n/translation.service';
+import type { PatientStatus } from '../../core/models/patient';
 
-export type PatientStatus = 'Waiting' | 'InTreatment' | 'Discharged' | 'Admitted';
+export type { PatientStatus } from '../../core/models/patient';
 
 @Component({
   selector: 'app-status-badge',

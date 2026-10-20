@@ -1,3 +1,9 @@
-<app-shell [title]="i18n.messages().appTitle" [boardHref]="boardHref" [registerHref]="registerHref">
+<app-loading-indicator [active]="loading.isLoading()" />
+<app-shell
+  [title]="i18n.messages().appTitle"
+  [boardHref]="boardHref"
+  [registerHref]="registerHref"
+  [busy]="loading.isLoading()"
+>
   <router-outlet />
 </app-shell>

@@ -24,7 +24,8 @@ Import each standalone component directly from this directory.
 | `EmptyState`       | `title: string`, `description: string` (optional); projected action content             | —               |
 | `ErrorBanner`      | `message: string`, `retryable: boolean` (default true)                                  | `retry: void`   |
 | `SkeletonRows`     | `count: number` (default 5; bounded to 0–20)                                            | —               |
-| `AppShell`         | `title`, `boardHref`, `registerHref`, `refreshEnabled`                                  | `refresh: void` |
+| `AppShell`         | `title`, `boardHref`, `registerHref`, `refreshEnabled`, `busy`                          | `refresh: void` |
+| `LoadingIndicator` | `active: boolean` (default false) | — |
 
 WaitingIndicator formats the API duration only: 12 min / 1 h 05 m. The level comes from the API, with a text label in addition to color. None + a duration displays frozen waiting time as “Waited”; null displays an accessible not-applicable dash. No threshold calculation or priority evaluation lives here.
 
@@ -33,3 +34,5 @@ WaitingIndicator formats the API duration only: 12 min / 1 h 05 m. The level com
 The app currently has no configured routes. Navigation items remain disabled until the corresponding real route exists; no route or placeholder screen is added. Refresh is disabled until a page supplies a handler. The shell clock updates locally every second, is cleaned up on destroy and makes no requests.
 
 All components are OnPush and use signal inputs/outputs. Existing JSON translations provide Arabic/English text; logical CSS properties support RTL. Use a real table with scoped headers and a labeled card list in the future board page. Shared styles do not add a DTO, request or form.
+
+The root now supplies global HTTP loading state to LoadingIndicator and AppShell.busy. LoadingIndicator is a non-blocking teal progress bar with a polite localized status message and static reduced-motion appearance. Shared components do not inject the HTTP loading service; the root owns this connection.
