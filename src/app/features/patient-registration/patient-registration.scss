@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+.registration-page {
+  max-width: 960px;
+}
+.page-heading {
+  margin-block-end: var(--space-5);
+}
+.page-heading h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 24px;
+  color: var(--color-navy);
+}
+.page-heading p,
+.field-hint {
+  color: var(--color-muted);
+}
+.field-hint {
+  font-size: 13px;
+  margin: 0;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+.form-section h3 {
+  margin: 0 0 var(--space-5);
+  font-size: 16px;
+}
+.success-panel {
+  padding: var(--space-5);
+  border-color: var(--color-teal);
+  margin-block-end: var(--space-5);
+}
+.success-panel h3 {
+  margin-block-start: 0;
+}
+.success-panel p,
+.failure-panel {
+  overflow-wrap: anywhere;
+}
+.result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.failure-panel {
+  margin-block-end: var(--space-5);
+}
+.failure-panel code {
+  user-select: all;
+}
+.validation-summary {
+  margin: 0;
+  color: var(--priority-1-fg);
+}

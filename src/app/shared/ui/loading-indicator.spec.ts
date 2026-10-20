@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { TranslationService } from '../../i18n/translation.service';
 import { LoadingIndicator } from './loading-indicator';
 
+afterEach(() => localStorage.removeItem('er-triage.language'));
+
 describe('LoadingIndicator', () => {
   it('announces active loading and clears both the indicator and message when idle', async () => {
     const fixture = TestBed.createComponent(LoadingIndicator);

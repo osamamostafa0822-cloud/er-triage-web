@@ -22,7 +22,7 @@ export interface TriageBoardItemDto {
 }
 
 /** HTTP query names from TriageBoardController, not the internal C# request's plural names.
- * status and priority are repeated query parameters; serialization belongs to the later API service.
+ * status and priority are repeated query parameters, serialized by TriageBoardApiService.
  */
 export interface TriageBoardQuery {
   readonly status?: readonly PatientStatus[];

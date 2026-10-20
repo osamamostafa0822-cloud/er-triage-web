@@ -1,0 +1,254 @@
+<div class="triage-page">
+  <header class="board-heading">
+    <div>
+      <h2>{{ i18n.messages().triageBoard }}</h2>
+      <p>{{ i18n.messages().boardIntro }}</p>
+    </div>
+    <a class="button button-primary" routerLink="/register">{{
+      i18n.messages().registerPatient
+    }}</a>
+  </header>
+
+  <section class="surface board-filters" [attr.aria-label]="i18n.messages().boardFilters">
+    <div class="field">
+      <label for="board-status">{{ i18n.messages().boardStatusFilter }}</label>
+      <select
+        id="board-status"
+        #statusSelect
+        [value]="selection().status"
+        (change)="setStatus(statusSelect.value)"
+      >
+        <option value="active">{{ i18n.messages().boardActiveStatuses }}</option>
+        <option value="all">{{ i18n.messages().boardAllStatuses }}</option>
+        <option value="Waiting">{{ i18n.messages().waiting }}</option>
+        <option value="InTreatment">{{ i18n.messages().inTreatment }}</option>
+        <option value="Discharged">{{ i18n.messages().discharged }}</option>
+        <option value="Admitted">{{ i18n.messages().admitted }}</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="board-priority">{{ i18n.messages().boardPriorityFilter }}</label>
+      <select
+        id="board-priority"
+        #prioritySelect
+        [value]="selection().priority"
+        (change)="setPriority(prioritySelect.value)"
+      >
+        <option value="all">{{ i18n.messages().boardAllPriorities }}</option>
+        <option value="1">P1 — {{ i18n.messages().critical }}</option>
+        <option value="2">P2 — {{ i18n.messages().high }}</option>
+        <option value="3">P3 — {{ i18n.messages().moderate }}</option>
+        <option value="4">P4 — {{ i18n.messages().low }}</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="board-page-size">{{ i18n.messages().boardPageSize }}</label>
+      <select
+        id="board-page-size"
+        #sizeSelect
+        [value]="selection().pageSize"
+        (change)="setPageSize(sizeSelect.value)"
+      >
+        @for (size of pageSizes; track size) {
+          <option [value]="size">{{ size }}</option>
+        }
+      </select>
+    </div>
+  </section>
+  <p class="board-note">
+    {{ i18n.messages().boardSnapshotNotice }} {{ i18n.messages().boardArrivalHint }}
+  </p>
+
+  <section
+    class="board-results"
+    [attr.aria-label]="i18n.messages().boardResults"
+    [attr.aria-busy]="state().kind === 'loading'"
+  >
+    @if (state().kind === 'loading') {
+      <app-skeleton-rows />
+    } @else if (failure(); as error) {
+      <app-error-banner [message]="error.message" (retry)="retry()" />
+      @if (error.errors.length || error.traceId) {
+        <div class="board-error-details">
+          @for (entry of error.errors; track $index) {
+            <p>{{ entry.message }}</p>
+          }
+          @if (error.traceId) {
+            <p>
+              {{ i18n.messages().traceId }}: <code dir="ltr">{{ error.traceId }}</code>
+            </p>
+          }
+        </div>
+      }
+    } @else if (page(); as result) {
+      <p class="result-summary" role="status" aria-live="polite">
+        {{ i18n.messages().boardTotal.replace('{value}', '' + result.totalCount) }}
+      </p>
+      @if (result.items.length === 0) {
+        <div class="surface">
+          <app-empty-state
+            [title]="
+              selection().pageNumber > 1
+                ? i18n.messages().boardEmptyPage
+                : i18n.messages().boardEmptyTitle
+            "
+            [description]="
+              selection().pageNumber > 1
+                ? i18n.messages().boardEmptyPageHint
+                : i18n.messages().boardEmptyHint
+            "
+          >
+            @if (selection().pageNumber > 1) {
+              <button class="button" type="button" (click)="goToPage(1)">
+                {{ i18n.messages().boardFirstPage }}
+              </button>
+            }
+          </app-empty-state>
+        </div>
+      } @else {
+        <div
+          class="surface board-table-wrap"
+          role="region"
+          tabindex="0"
+          [attr.aria-label]="i18n.messages().boardTableCaption"
+        >
+          <table class="board-table">
+            <caption class="visually-hidden">
+              {{
+                i18n.messages().boardTableCaption
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ i18n.messages().boardPriorityFilter }}</th>
+                <th scope="col">{{ i18n.messages().fullName }}</th>
+                <th scope="col">{{ i18n.messages().age }}</th>
+                <th scope="col">{{ i18n.messages().chiefComplaint }}</th>
+                <th scope="col">{{ i18n.messages().arrivalTime }}</th>
+                <th scope="col">{{ i18n.messages().boardWaitingDuration }}</th>
+                <th scope="col">{{ i18n.messages().boardStatusFilter }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (patient of result.items; track patient.id) {
+                <tr [attr.data-priority]="patient.currentPriority">
+                  <td>
+                    <app-priority-badge [priority]="patient.currentPriority" /><span
+                      class="priority-reason"
+                      >{{ patient.priorityReason }}</span
+                    >
+                    @if (patient.isOverridden) {
+                      <span class="manual-override"
+                        >{{ i18n.messages().boardOverridden }}: {{ patient.overrideReason }}</span
+                      >
+                    }
+                  </td>
+                  <th scope="row" class="patient-name">
+                    <bdi>{{ patient.fullName }}</bdi>
+                  </th>
+                  <td class="numeric">{{ patient.age }}</td>
+                  <td class="complaint">
+                    <bdi>{{ patient.chiefComplaint }}</bdi>
+                  </td>
+                  <td>
+                    <time [attr.datetime]="patient.arrivalTime">{{
+                      formatArrival(patient.arrivalTime)
+                    }}</time>
+                  </td>
+                  <td>
+                    <app-waiting-indicator
+                      [waitingMinutes]="patient.waitingMinutes"
+                      [waitingLevel]="patient.waitingLevel"
+                    />
+                  </td>
+                  <td><app-status-badge [status]="patient.status" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="board-cards" role="list" [attr.aria-label]="i18n.messages().boardResults">
+          @for (patient of result.items; track patient.id) {
+            <article
+              class="surface board-card"
+              role="listitem"
+              [attr.data-priority]="patient.currentPriority"
+            >
+              <div class="board-card-heading">
+                <h3>
+                  <bdi>{{ patient.fullName }}</bdi>
+                </h3>
+                <app-priority-badge [priority]="patient.currentPriority" />
+              </div>
+              <p class="priority-reason">{{ patient.priorityReason }}</p>
+              @if (patient.isOverridden) {
+                <p class="manual-override">
+                  {{ i18n.messages().boardOverridden }}: {{ patient.overrideReason }}
+                </p>
+              }
+              <dl>
+                <div>
+                  <dt>{{ i18n.messages().age }}</dt>
+                  <dd>{{ patient.age }}</dd>
+                </div>
+                <div>
+                  <dt>{{ i18n.messages().boardStatusFilter }}</dt>
+                  <dd><app-status-badge [status]="patient.status" /></dd>
+                </div>
+                <div class="card-wide">
+                  <dt>{{ i18n.messages().chiefComplaint }}</dt>
+                  <dd>
+                    <bdi>{{ patient.chiefComplaint }}</bdi>
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ i18n.messages().arrivalTime }}</dt>
+                  <dd>
+                    <time [attr.datetime]="patient.arrivalTime">{{
+                      formatArrival(patient.arrivalTime)
+                    }}</time>
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ i18n.messages().boardWaitingDuration }}</dt>
+                  <dd>
+                    <app-waiting-indicator
+                      [waitingMinutes]="patient.waitingMinutes"
+                      [waitingLevel]="patient.waitingLevel"
+                    />
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          }
+        </div>
+        <nav class="board-pagination" [attr.aria-label]="i18n.messages().boardPagination">
+          <button
+            class="button"
+            type="button"
+            [disabled]="result.pageNumber <= 1"
+            (click)="goToPage(result.pageNumber - 1)"
+          >
+            {{ i18n.messages().boardPrevious }}
+          </button>
+          <p aria-live="polite">
+            {{
+              i18n
+                .messages()
+                .boardPageIndicator.replace('{page}', '' + result.pageNumber)
+                .replace('{pages}', '' + result.totalPages)
+            }}
+          </p>
+          <button
+            class="button"
+            type="button"
+            [disabled]="result.pageNumber >= result.totalPages"
+            (click)="goToPage(result.pageNumber + 1)"
+          >
+            {{ i18n.messages().boardNext }}
+          </button>
+        </nav>
+      }
+    }
+  </section>
+</div>

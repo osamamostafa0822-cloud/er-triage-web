@@ -194,12 +194,13 @@
   position: relative;
 }
 .field-with-unit input {
-  padding-inline-end: 68px;
+  padding-inline-end: 88px;
   font-variant-numeric: tabular-nums;
 }
 .field-unit {
   position: absolute;
-  inset-inline-end: 12px;
+  /* Leave room for the native number-input stepper after the unit. */
+  inset-inline-end: 36px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-muted);

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { interval, map, startWith } from 'rxjs';
@@ -24,9 +16,7 @@ export class AppShell {
   // Only actual configured routes are supplied by the host. Null renders a disabled item.
   readonly boardHref = input<string | null>(null);
   readonly registerHref = input<string | null>(null);
-  readonly refreshEnabled = input(false);
   readonly busy = input(false);
-  readonly refresh = output<void>();
   protected readonly i18n = inject(TranslationService);
   protected readonly collapsed = signal(false);
   protected readonly now = toSignal(

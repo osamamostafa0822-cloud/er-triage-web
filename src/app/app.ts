@@ -16,7 +16,11 @@ export class App {
   protected readonly i18n = inject(TranslationService);
   protected readonly loading = inject(LoadingService);
   private readonly router = inject(Router);
-  protected readonly boardHref = this.router.config.some((route) => route.path === '') ? '/' : null;
+  protected readonly boardHref = this.router.config.some(
+    (route) => route.path === '' && (route.component || route.loadComponent || route.loadChildren),
+  )
+    ? '/'
+    : null;
   protected readonly registerHref = this.router.config.some((route) => route.path === 'register')
     ? '/register'
     : null;

@@ -2,6 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
 import { LoadingService } from './core/http/loading.service';
+import { routes } from './app.routes';
+
+afterEach(() => localStorage.removeItem('er-triage.language'));
 
 describe('App', () => {
   beforeEach(async () => {
@@ -14,6 +17,20 @@ describe('App', () => {
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('enables both board and registration navigation for the implemented routes', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const links = fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>;
+    expect(Array.from(links, (link) => link.getAttribute('href'))).toEqual([
+      '/',
+      '/register',
+      '/',
+      '/register',
+    ]);
+    expect(fixture.nativeElement.querySelector('footer')?.textContent).toContain('fictional');
   });
 
   it('should render the application title and the router outlet', async () => {
@@ -45,10 +62,9 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    const select = compiled.querySelector('select')!;
+    const languageButton = compiled.querySelector<HTMLButtonElement>('.language-control')!;
 
-    select.value = 'ar';
-    select.dispatchEvent(new Event('change'));
+    languageButton.click();
     await fixture.whenStable();
 
     expect(compiled.querySelector('h1')?.textContent).toContain('لوحة فرز حالات الطوارئ');
@@ -56,8 +72,7 @@ describe('App', () => {
     expect(document.documentElement.dir).toBe('rtl');
     expect(document.title).toBe('لوحة فرز حالات الطوارئ');
 
-    select.value = 'en';
-    select.dispatchEvent(new Event('change'));
+    languageButton.click();
     await fixture.whenStable();
 
     expect(compiled.querySelector('h1')?.textContent).toContain('ER Triage Board');

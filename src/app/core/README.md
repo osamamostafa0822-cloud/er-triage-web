@@ -1,6 +1,6 @@
 # Frontend API foundation (F2)
 
-No request is issued by this module on startup. F3 will add the registration API service and response unwrapping; forms, routing, polling and real API verification belong to later phases.
+No request is issued by this module on startup. F3 implements the registration API service and response unwrapping in `features/patient-registration/services/patient-registration-api.service.ts`; F4 implements its typed form model/validators/mapping in the adjacent `forms/` directory. The page, routing, polling and real API verification belong to later phases.
 
 ## Contract sources
 
@@ -18,6 +18,8 @@ Wire DTOs use camelCase, readonly arrays/properties, string status/level unions,
 
 ## HTTP configuration
 
+`BaseApiService.request<TResult>(method, url, body?, options?)` is the shared JSON transport for feature services. It returns the typed body by default; `{ observe: 'response' }` returns `HttpResponse<TResult>` with status and headers. Options support headers, query parameters, HTTP context and credentials. It delegates directly to Angular HttpClient, preserving cold subscriptions, cancellation and the existing interceptors. Patient registration uses this transport while retaining its feature-specific envelope validation. Response types belong to each call, so the service itself needs no generic `any` parameter.
+
 `API_BASE_URL` defaults to the build environment's `apiBaseUrl`; tests can override the token. Empty means same-origin. Dedicated feature services will compose `{baseUrl}/api/...` paths. Development is configured for port 5080; production contains no host.
 
 `app.config.ts` registers `provideHttpClient(withInterceptors([loadingInterceptor, apiErrorInterceptor]))`. Both interceptors share the `isApiRequest` boundary and apply only to `{API_BASE_URL}/api/...`, leaving asset and third-party requests untouched.
@@ -26,7 +28,7 @@ Wire DTOs use camelCase, readonly arrays/properties, string status/level unions,
 - On HTTP failure, validates the complete failure envelope at runtime before accepting its message, field errors and traceId.
 - Emits `ApiError extends Error` with `status`, `message`, `errors` and `traceId`. Wire error entries are named `ApiFieldError` to distinguish them from this normalized error.
 - Status 0 uses the localized network fallback; ProblemDetails, proxy HTML, null and malformed bodies use a localized HTTP-status fallback.
-- Passes success bodies and non-HTTP errors through. Success envelope validation/unwrapping belongs to F3.
+- Passes success bodies and non-HTTP errors through. The F3 registration service validates the success flag/non-null object payload and unwraps its PatientDto; this logic stays out of the generic interceptor.
 - Does not retry, log raw bodies/payloads, show a toast, persist patient data or evaluate business rules.
 
 ## Verification

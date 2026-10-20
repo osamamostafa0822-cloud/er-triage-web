@@ -1,0 +1,154 @@
+<div class="registration-page">
+  <header class="page-heading">
+    <h2>{{ i18n.messages().registerPatient }}</h2>
+    <p>{{ i18n.messages().registrationIntro }}</p>
+  </header>
+
+  <div class="announcement" role="status" aria-live="polite">
+    @if (patient(); as saved) {
+      <section class="surface success-panel">
+        <h3>{{ i18n.messages().registrationSuccess }}</h3>
+        <p>
+          <bdi>{{ saved.fullName }}</bdi>
+        </p>
+        <div class="result-badges">
+          <app-priority-badge [priority]="saved.currentPriority" />
+          <app-status-badge [status]="saved.status" />
+        </div>
+        <p>{{ saved.priorityReason }}</p>
+        <button type="button" class="button" (click)="startAnother()">
+          {{ i18n.messages().registerAnother }}
+        </button>
+      </section>
+    }
+  </div>
+
+  @if (failure(); as error) {
+    <section class="failure-panel" aria-label="{{ i18n.messages().registrationFailed }}">
+      <app-error-banner [message]="error.message" [retryable]="false" />
+      @if (bannerErrors().length) {
+        <ul>
+          @for (entry of bannerErrors(); track $index) {
+            <li>{{ entry.message }}</li>
+          }
+        </ul>
+      }
+      @if (error.status === 0 || error.status >= 500) {
+        <p>{{ i18n.messages().registrationUncertain }}</p>
+      }
+      @if (error.traceId) {
+        <p>
+          {{ i18n.messages().traceId }}: <code dir="ltr">{{ error.traceId }}</code>
+        </p>
+      }
+    </section>
+  }
+
+  <form
+    #registrationForm
+    class="registration-form"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    novalidate
+    [attr.aria-busy]="submitting()"
+  >
+    @if (attempted() && invalidCount()) {
+      <p class="validation-summary" role="alert">
+        {{ i18n.messages().validationSummary.replace('{value}', '' + invalidCount()) }}
+      </p>
+    }
+    <fieldset [disabled]="submitting()">
+      <legend class="visually-hidden">{{ i18n.messages().registerPatient }}</legend>
+      @for (section of sections; track section.title) {
+        <section class="form-section" [attr.aria-labelledby]="'section-' + section.title">
+          <h3 [id]="'section-' + section.title">{{ i18n.messages()[section.title] }}</h3>
+          <div class="form-grid">
+            @for (field of section.fields; track field.name) {
+              <div class="field" [class.field-wide]="field.wide">
+                <label [for]="'field-' + field.name">
+                  {{ i18n.messages()[field.label] }}
+                  @if (field.unit) {
+                    <span class="visually-hidden">({{ field.unit }})</span>
+                  }
+                </label>
+                @if (field.type === 'textarea') {
+                  <textarea
+                    [id]="'field-' + field.name"
+                    [formControl]="controls[field.name]"
+                    required
+                    [attr.aria-invalid]="errors(field.name).length > 0"
+                    [attr.aria-describedby]="
+                      errors(field.name).length ? 'error-' + field.name : null
+                    "
+                  ></textarea>
+                } @else {
+                  <div
+                    [class.field-with-unit]="!!field.unit"
+                    [attr.dir]="field.type === 'number' ? 'ltr' : null"
+                  >
+                    @if (field.type === 'number') {
+                      <input
+                        type="number"
+                        [id]="'field-' + field.name"
+                        [formControl]="controls[field.name]"
+                        [attr.min]="field.min"
+                        [attr.max]="field.max"
+                        [attr.step]="field.step ?? '1'"
+                        required
+                        [attr.aria-invalid]="errors(field.name).length > 0"
+                        [attr.aria-describedby]="
+                          errors(field.name).length ? 'error-' + field.name : null
+                        "
+                      />
+                    } @else {
+                      <input
+                        [id]="'field-' + field.name"
+                        [type]="field.type"
+                        [formControl]="controls[field.name]"
+                        [attr.min]="field.min"
+                        [attr.max]="field.max"
+                        [attr.step]="field.step ?? null"
+                        [attr.autocomplete]="field.name === 'fullName' ? 'off' : null"
+                        required
+                        [attr.aria-invalid]="errors(field.name).length > 0"
+                        [attr.aria-describedby]="
+                          errors(field.name).length
+                            ? 'error-' + field.name
+                            : field.name === 'arrivalTime'
+                              ? 'arrival-hint'
+                              : null
+                        "
+                      />
+                    }
+                    @if (field.unit) {
+                      <span class="field-unit" aria-hidden="true" dir="ltr">{{ field.unit }}</span>
+                    }
+                  </div>
+                }
+                @if (field.name === 'arrivalTime') {
+                  <p id="arrival-hint" class="field-hint">{{ i18n.messages().arrivalHint }}</p>
+                }
+                @if (errors(field.name).length) {
+                  <div [id]="'error-' + field.name">
+                    @for (message of errors(field.name); track $index) {
+                      <p class="field-error">{{ message }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </fieldset>
+    <p class="field-hint">{{ i18n.messages().registrationPriorityHint }}</p>
+    <div class="form-actions">
+      <button type="submit" class="button button-primary" [disabled]="submitting()">
+        {{ submitting() ? i18n.messages().registering : i18n.messages().registerPatient }}
+      </button>
+      <button type="button" class="button" [disabled]="submitting()" (click)="startAnother()">
+        {{ i18n.messages().clearForm }}
+      </button>
+    </div>
+  </form>
+</div>

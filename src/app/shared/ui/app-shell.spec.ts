@@ -5,12 +5,12 @@ import { AppShell } from './app-shell';
 describe('AppShell', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter([])] }));
 
-  it('does not invent links or enable refresh when the host has no page connection', async () => {
+  it('does not invent links or render a refresh button', async () => {
     const fixture = TestBed.createComponent(AppShell);
     fixture.componentRef.setInput('title', 'ER Triage Board');
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('nav a')).toBeNull();
-    expect(fixture.nativeElement.querySelector('button[aria-label="Refresh"]').disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('button[aria-label="Refresh"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('time').getAttribute('datetime')).toBeTruthy();
     const collapse = fixture.nativeElement.querySelector(
       'button[aria-label="Collapse sidebar"]',
@@ -25,21 +25,16 @@ describe('AppShell', () => {
     ).toBe('false');
   });
 
-  it('uses only host-supplied routes and emits refresh when explicitly enabled', async () => {
+  it('uses only host-supplied routes', async () => {
     const fixture = TestBed.createComponent(AppShell);
     fixture.componentRef.setInput('title', 'Triage Board');
     fixture.componentRef.setInput('boardHref', '/');
     fixture.componentRef.setInput('registerHref', '/register');
-    fixture.componentRef.setInput('refreshEnabled', true);
-    const refresh = vi.fn();
-    fixture.componentInstance.refresh.subscribe(refresh);
     await fixture.whenStable();
     const hrefs = Array.from(
       fixture.nativeElement.querySelectorAll('nav a') as NodeListOf<HTMLAnchorElement>,
       (anchor) => anchor.getAttribute('href'),
     );
     expect(hrefs).toEqual(['/', '/register', '/', '/register']);
-    fixture.nativeElement.querySelector('button[aria-label="Refresh"]').click();
-    expect(refresh).toHaveBeenCalledTimes(1);
   });
 });

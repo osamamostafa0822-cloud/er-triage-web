@@ -1,73 +1,75 @@
 # ER Triage Board — Angular frontend
 
-Angular client for the ER Triage Board demo (nurse intake form, prioritized board, status workflow, priority override).
-**Fictional data only. Not clinically validated.** No authentication (demo limitation).
+**Current status (2026-10-20): M5 intake and M6.1 read-only board are implemented.** The board has status/priority filters and server pagination; polling/status/override actions remain future phases. Reduced-motion visual verification remains open. Fictional data only; not clinically validated. No authentication.
 
-> **Status: F1 verified; D-78 shared design and F2 API foundation implemented.** Typed wire models, API configuration and error handling exist. Feature API services, registration and board pages are not implemented. Current dependency audit has 4 open findings; see below.
+## Run locally
 
-## Stack
-Current checked install: Angular core 20.3.34, CLI/build 20.3.40 (standalone, zoneless, strict templates), TypeScript 5.9.3, RxJS 7.8.2, Vitest 3.2.7 and jsdom 26.1.0. Plain SCSS; no SSR or state library. CDK is already in the package manifest; F2 adds or uses no extra package.
-Originally scaffolded with Angular 22.2.3. The existing toolchain had changed before F2; this phase preserves that configuration.
+Use a compatible Node version: the installed Angular 21 toolchain accepts ^20.19.0, ^22.12.0 or >=24.0.0. Verified on Windows: Node 22.23.2 / npm 11.6.2. packageManager records npm 10.9.8.
 
-## Backend contract
-This client talks to the ER Triage API. It was planned against backend commit `332227f` (`master`, 2026-10-20). Contract sources: the API's `/openapi/v1.json` (Scalar UI at `/scalar`) and the backend HTTP integration tests. All JSON responses use `GeneralResponse<T>` (`success`, `message`, `data`, `errors`, `traceId`); property names are camelCase and enums are strings. The backend repository is separate; if it changes, update this note.
+From this folder, in PowerShell:
 
-## Prerequisites
-- A Node version compatible with the installed Angular toolchain. F2 was verified on Windows with Node 22.23.2 and npm 11.6.2; packageManager still records npm 10.9.8.
-- For later phases: the API running on `http://localhost:5080` (profile `http`, Development environment; it migrates and seeds the development database on start).
-
-## Commands (PowerShell, from this folder)
 ```powershell
-npm ci                          # exact versions from package-lock.json (first time; use "npm install" only to change dependencies)
-npm start                       # ng serve, http://localhost:4200 (development configuration)
-npx ng build --configuration development
-npx ng build --configuration production
-npm test -- --watch=false       # ng test, Vitest + jsdom, runs once
-npm audit
+npm ci
+npm start
 ```
-CORS: the backend allows the origin `http://localhost:4200` in Development.
 
-## Environments
-`src/environments/` — `environment.ts` is the default (production) file and `environment.development.ts` replaces it in the `development` build configuration (`ng serve`, tests built for development).
+Open http://localhost:4200 for the lazy triage board; /register remains intake and unknown paths retain the registration fallback. Start the backend separately on http://localhost:5080 using its http launch profile; Development CORS allows http://localhost:4200. For an already migrated database, the root README shows how to disable migration and seed startup. A fresh database needs reviewed migrations first.
 
-| File | `apiBaseUrl` | Meaning |
+## Implemented behavior
+
+- Nine required registration fields, typed Reactive Forms and localized client/server validation. Full name also needs three whitespace-separated words (owner-requested frontend rule; backend length contract unchanged).
+- Browser-local arrival defaults/resets to now and converts to UTC on submission. Backend owns clinical priority, status and reason.
+- One guarded POST, disabled inputs while sending, global loading, input retention on failure, mapped field errors and selectable TraceId.
+- Inline success panel with server-supplied priority/status/reason. No automatic retry: a lost response may mean the patient was already saved.
+- English/Arabic, RTL and globe language toggle; only en/ar preference is stored in localStorage, never patient data. Blocked storage falls back to the current in-memory language.
+- Responsive shell, current-route skip-to-content, demo footer and fixed phone navigation with both board and registration links.
+- Read-only board using GET /api/triage-board, current priority/reason/status/waiting supplied by the server, local arrival formatting and shared desktop table/mobile cards. Status defaults to the active queue; all statuses are sent explicitly. Priority all/P1–P4 and page sizes 10/25/50/100 use server filtering/paging, with page 1 reset on filter/size change.
+- Superseded GETs cancel; loading/empty/error/explicit retry and out-of-range-page recovery are supported. Language changes re-read the current selection without resetting it. Waiting is a snapshot, not locally advanced.
+
+No board polling, status actions, override dialog, authentication, toast service or frontend priority calculation is implemented.
+
+## Current stack and structure
+
+Angular core 21.2.25 / CLI-build 21.2.27 / CDK 21.2.14, TypeScript 5.9.3, RxJS 7.8.2, Vitest/mocker 4.1.12, jsdom 26.1.0. Standalone, zoneless, strict templates, plain SCSS; no SSR or state library. The owner-approved security upgrade replaced Angular 20/Vitest 3. Angular 22 was the original scaffold; it does not describe the current install. tinypool is no longer in the dependency graph; Vite 7.3.6 satisfies Angular/Vitest without overrides.
+
+- src/app/core: environment API base URL, wire models, language/error/loading interceptors.
+- src/app/shared/ui: shell, priority/status/waiting presentation, loading/empty/error components, shared styles.
+- src/app/features/patient-registration: page, forms/validators/request mapping and dedicated API service.
+- src/app/features/triage-board: read-only page, dedicated API service, tests and test-only fixtures; existing board/query/paging DTOs reused.
+- src/app/i18n: typed English/Arabic JSON resources and language service.
+- src/app/app.routes.ts and app.config.ts: lazy registration, redirects, anchor scrolling and providers.
+
+Pages orchestrate; shared UI presents; only feature services make API calls. See src/app/features/patient-registration/README.md and the project docs for details.
+
+## API contract and environments
+
+Built against backend commit 332227f. Source contracts are backend DTOs/validators, HTTP integration tests and /openapi/v1.json (Scalar at /scalar). Responses use GeneralResponse<T>, camelCase fields and string enums. Unsupported Content-Type can return framework 415 ProblemDetails; the interceptor handles non-envelope failures.
+
+| Build | apiBaseUrl | Deployment requirement |
 |---|---|---|
-| `environment.development.ts` | `http://localhost:5080` | API started with the `http` launch profile |
-| `environment.ts` (production) | `''` (empty) | same origin: requests go to `/api/...` on the host that serves the app, for example behind a reverse proxy. **No host is hardcoded**; change it at deployment if the API lives elsewhere |
+| Development | http://localhost:5080 | API http profile; frontend origin localhost:4200 |
+| Production | empty string | Same-origin /api reverse proxy; SPA fallback to index.html for /register |
 
-Both files share the `Environment` interface (`environment.model.ts`), so a key cannot exist in one file only. No secret belongs in these files: they are shipped to the browser.
+The development build replaces environment.ts with environment.development.ts; both implement Environment. No secrets belong in browser configuration. Production hosting is not configured.
 
-## Structure (target, `docs/02-architecture/frontend-architecture.md`)
-`src/app/core` (config, models, HTTP interceptor) · `src/app/shared/ui` · `src/app/features/<feature>/{pages,components,services,models}`. Pages orchestrate, components present, HTTP only in services. Created from F2 onwards.
+## Verification
 
-## Version control
-This folder is its own Git repository (default branch `main`), separate from the backend repository. No remote is configured yet.
+```powershell
+npm test -- --watch=false
+npm run build -- --configuration development
+npm run build -- --configuration production
+npm audit
+npm audit --omit=dev
+```
 
-## Known limitations
-The shared UI supports English/Arabic and RTL; feature pages are not implemented. Inter font files were not supplied (system-ui fallback). No idempotency key on registration (a retry after a lost response can register a patient twice).
+Latest executed M6.1 checks: **284 tests passed, 0 failed, 0 skipped in 22 files**, app/spec types, both builds, changed/new source formatting and git diff --check passed. No lint target is configured. Production initial bundle is 303.20 kB raw / 82.55 kB transfer, board lazy 19.92 kB / 5.38 kB; no budget warnings or production localhost references. API service/page tests use actual interceptors with mocked HTTP, including cancellation and no-polling assertions. Live GET-only review covered filters, pages/size reset/last page and EN/AR desktop/tablet/375 px. No patient POST or backend/schema/package change in M6.1. Full file list/contracts/results: ../../docs/05-delivery/m6-1.md.
 
-### F1 Windows verification — 2026-10-20
-Assistant-run on Windows using a portable Node v22.22.3 and npm 10.9.8 in the user's temporary directory. The system Node installation remains v22.17.0; use the compatible runtime for future Angular commands. Owner authorized using any valid Node version. `npm ci`: 281 packages installed, 282 audited, no engine warnings, 0 vulnerabilities. Development build passed; production build passed (197.69 kB initial raw / 54.32 kB estimated transfer). `npm test -- --watch=false`: 2 files, 4 tests passed, including Arabic/English switching. Standalone `npm audit`: 0 vulnerabilities. Production JavaScript scan: 0 occurrences of `localhost`. Backend `git status --short`: empty, HEAD `332227f`; frontend status clean on `main`, no remote output. No commit, push, merge, API start, migration or seed was run. Sandbox restrictions required network-enabled dependency installation and elevated build output access; the completed checks above used the Windows runtime, not Linux. F1 technical verification passed; owner approval of this report is still pending. D-78 implementation has not started.
+The preceding security upgrade's full/production-only audits reported **zero vulnerabilities**, both exit 0. F7's four findings were resolved. M6.1 does not change package.json, package-lock.json or angular.json (hash-verified), so audits were not rerun in this source-only phase. Report/raw evidence: ../../docs/05-delivery/security-upgrade.md; earlier F7 reports retain pre-fix findings.
 
-## Shared visual design (D-78)
-The owner's prototype supplies visual styling only. See [shared UI usage](src/app/shared/ui/README.md) for tokens, component inputs/outputs, board table/mobile card classes, form section classes, accessible field errors and unit suffixes. All shared components are standalone, OnPush, signal-based and contain no API/business logic.
+Reduced-motion CSS was inspected, but this browser exposes viewport resizing and no motion emulation. Actual reduced-motion appearance remains a manual check. Inter font files were not supplied; system-ui fallback remains without external font requests.
 
-The root now uses the responsive navy/teal shell. Because app.routes.ts is empty, nav entries stay disabled; no feature page or API connection is implied by the shell. Refresh becomes available when a page supplies a handler. The local clock is unrelated to board polling; no polling or SignalR is implemented. JSON English/Arabic and RTL are supported. Inter files were not supplied; system-ui is the documented fallback (public/fonts/README.md). No package was added.
+## Version control and next work
 
-Windows verification with portable Node 22.22.3 / npm 10.9.8: development and production builds passed; 25 tests in 9 files passed; npm audit 0 vulnerabilities; production JavaScript contains no localhost; backend clean. Production initial bundle: 252.27 kB raw / 68.74 kB estimated transfer. Desktop shell checked in English/Arabic; mobile viewport, keyboard and reduced-motion visual checks still need manual review. This section supersedes the earlier F1 pending-approval and English-only status notes. No later phase started.
+This folder is its own Git repository on main; no remote is configured. backend/ is a separate repository; root docs/SPEC/PROMPTS remain outside both repositories (D-51/D-76). No commit/push was created in F7. Historical verification and decisions are retained in the project progress/AI-decision logs; previous documentation is backed up under _backup/f7-documentation-20261020.
 
-## API foundation (F2)
-See [core integration notes](src/app/core/README.md). API_BASE_URL comes from the build environment and can be overridden in tests. HttpClient is configured with an API-only interceptor that sends the selected English/Arabic language and normalizes failures to ApiError (status, message, field errors, traceId). Malformed/non-envelope bodies and network failures get safe localized fallbacks. No retry, toast, logging, actual patient request or success unwrapping is added. F3 will add the registration service.
-
-Readonly wire models were checked against backend 332227f DTOs, request records, controllers, JSON configuration and HTTP test sources. The API was not started; live OpenAPI/end-to-end verification is deferred. The raw registration request retains nullable fields; the later validated form will submit non-null values. The shared UI imports the canonical status/priority/waiting types.
-
-F2 verification on Windows (Node 22.23.2, npm 11.6.2): development/production builds passed; 11 test files / 49 tests passed, including 24 new HTTP/config cases; production JavaScript localhost matches 0; backend clean. Production initial bundle: 265.21 kB raw / 71.97 kB estimated transfer. Angular 20's unit-test builder prints its EXPERIMENTAL notice.
-
-Current npm audit: 4 findings (2 moderate, 2 critical) in the existing test/build chain (@vitest/mocker, tinypool, vitest, @angular/build). npm proposes a breaking Vitest 5.0.5 upgrade via audit fix --force; no fix or dependency change was applied. These findings supersede earlier zero-vulnerability snapshots. A compatible toolchain remediation is still open. No backend, API/database run, Git publishing or later phase was performed.
-
-## Global API loading
-The app now shows a non-blocking teal progress bar while tracked API requests are active. LoadingService uses a readonly signal counter, so completing or cancelling one concurrent request does not hide the loader for others. The interceptor finalizes on success, error and cancellation, preserves error/language handling, and adds no automatic retry. The shell exposes main aria-busy; the indicator has localized English/Arabic status announcements and a static reduced-motion appearance.
-
-To opt out a background call, pass context: new HttpContext().set(SKIP_GLOBAL_LOADING, true). See core/README.md for imports and usage. No polling, authentication/token flow, feature API service or request on startup is added.
-
-Windows verification: development/production builds passed; 67 tests in 14 files passed; production initial bundle 267.77 kB raw / 72.55 kB estimated transfer. Dependencies were not changed, so the prior F2 audit report remains the latest (4 open findings: 2 moderate, 2 critical); audit was not rerun in this source-only increment. Manual browser/motion review of the active loader remains pending. No backend or Git publishing operation.
+Next: actual reduced-motion visual check and separately approved M6.2 work. Polling/status/override actions are not implemented. CI/final clean-clone delivery remain later work. Preview is available at localhost:4200.

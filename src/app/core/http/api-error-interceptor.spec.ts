@@ -14,6 +14,8 @@ import type { GeneralResponse } from '../models/general-response';
 import { ApiError } from './api-error';
 import { apiErrorInterceptor } from './api-error-interceptor';
 
+afterEach(() => localStorage.removeItem('er-triage.language'));
+
 describe('apiErrorInterceptor', () => {
   const baseUrl = 'https://triage.example.test';
   const url = `${baseUrl}/api/patients`;

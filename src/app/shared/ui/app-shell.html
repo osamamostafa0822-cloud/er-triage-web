@@ -1,4 +1,4 @@
-<a class="skip-link button" href="#main-content">{{ i18n.messages().skipContent }}</a>
+<a class="skip-link button" [routerLink]="[]" fragment="main-content">{{ i18n.messages().skipContent }}</a>
 <div class="shell" [class.collapsed]="collapsed()">
   <aside class="sidebar" [attr.aria-label]="i18n.messages().primaryNavigation">
     <div class="brand">
@@ -86,11 +86,18 @@
         </div>
         <button
           type="button"
-          class="button icon-button"
-          [disabled]="!refreshEnabled()"
-          [attr.aria-label]="i18n.messages().refresh"
-          [title]="i18n.messages().refresh"
-          (click)="refresh.emit()"
+          class="button icon-button language-control"
+          [attr.aria-label]="
+            i18n.language() === 'ar'
+              ? i18n.messages().switchToEnglish
+              : i18n.messages().switchToArabic
+          "
+          [title]="
+            i18n.language() === 'ar'
+              ? i18n.messages().switchToEnglish
+              : i18n.messages().switchToArabic
+          "
+          (click)="i18n.setLanguage(i18n.language() === 'ar' ? 'en' : 'ar')"
         >
           <svg
             aria-hidden="true"
@@ -98,25 +105,17 @@
             fill="none"
             stroke="currentColor"
             stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
           >
-            <path d="M20 7v5h-5M4 17v-5h5" />
-            <path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3a18 18 0 0 1 0 18 18 18 0 0 1 0-18Z" />
           </svg>
         </button>
-        <label class="language-control"
-          ><span class="visually-hidden">{{ i18n.messages().languageLabel }}</span>
-          <select #language [value]="i18n.language()" (change)="i18n.setLanguage(language.value)">
-            <option value="en" lang="en">English</option>
-            <option value="ar" lang="ar">العربية</option>
-          </select>
-        </label>
       </div>
     </header>
     <main id="main-content" tabindex="-1" [attr.aria-busy]="busy()">
       <div class="content"><ng-content /></div>
     </main>
+    <footer class="demo-footer">{{ i18n.messages().demoNotice }}</footer>
   </div>
   <nav class="mobile-nav" [attr.aria-label]="i18n.messages().primaryNavigation">
     @for (item of navigation(); track item.label) {

@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { PriorityBadge, Priority } from './priority-badge';
 import { TranslationService } from '../../i18n/translation.service';
 
+afterEach(() => localStorage.removeItem('er-triage.language'));
+
 describe('PriorityBadge', () => {
   it.each([
     [1, 'Critical'],
