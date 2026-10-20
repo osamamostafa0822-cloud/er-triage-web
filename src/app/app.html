@@ -1,0 +1,18 @@
+<header class="app-header">
+  <h1>{{ i18n.messages().appTitle }}</h1>
+  <label>
+    {{ i18n.messages().languageLabel }}
+    <select
+      #language
+      [value]="i18n.language()"
+      (change)="i18n.setLanguage(language.value)"
+    >
+      <option value="en" lang="en">English</option>
+      <option value="ar" lang="ar">العربية</option>
+    </select>
+  </label>
+</header>
+
+<main class="app-main">
+  <router-outlet />
+</main>
