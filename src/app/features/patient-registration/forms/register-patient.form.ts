@@ -1,5 +1,6 @@
 import { FormControl, FormGroup } from '@angular/forms';
 import type { RegisterPatientRequest } from '../../../core/models/patient-requests';
+import { trimmedLength } from '../../../shared/forms/text-validators';
 import { formatLocalArrival, parseLocalArrival, RegistrationClock } from './registration-datetime';
 import { registrationLimits as limits } from './registration-limits';
 import {
@@ -8,7 +9,6 @@ import {
   fullNameValidator,
   numberInRange,
   temperaturePrecision,
-  trimmedLength,
 } from './registration.validators';
 
 export interface VitalSignsControls {

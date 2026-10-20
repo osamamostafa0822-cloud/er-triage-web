@@ -1,6 +1,6 @@
 # Triage Board — M6.1
 
-The lazy standalone OnPush TriageBoard page is served at /. /register stays available; unknown routes retain the registration fallback. This phase is read-only: no polling, transition buttons or override editor.
+The lazy standalone OnPush TriageBoard page is served at /. /register stays available; unknown routes retain the registration fallback. M6.2 adds `actions/` (row buttons and one dialog for status changes and overrides), `services/patient-workflow-api.service.ts` and live SignalR notices (`core/realtime`). Buttons come from the server's `allowedTransitions`; the page never holds the transition matrix. Other users' changes show a notice and trigger a silent refetch; there is no polling timer.
 
 TriageBoardApiService uses the existing BaseApiService and root interceptors for GET /api/triage-board, returning PagedResult<TriageBoardItemDto> from GeneralResponse. It sends repeated status/priority parameters, checks usable wire shapes and preserves the API order and metadata. Clinical priority, waiting level, filters, sorting and paging remain server-owned.
 

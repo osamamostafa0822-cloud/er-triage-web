@@ -1,17 +1,7 @@
 import type { ValidatorFn } from '@angular/forms';
+import { trimmedLength } from '../../../shared/forms/text-validators';
 import { parseLocalArrival, RegistrationClock } from './registration-datetime';
 import { registrationLimits as limits } from './registration-limits';
-
-export function trimmedLength(min: number, max: number): ValidatorFn {
-  return (control) => {
-    const value: unknown = control.value;
-    if (typeof value !== 'string' || value.trim().length === 0) return { required: true };
-    const actualLength = value.trim().length;
-    if (actualLength < min) return { minlength: { requiredLength: min, actualLength } };
-    if (actualLength > max) return { maxlength: { requiredLength: max, actualLength } };
-    return null;
-  };
-}
 
 export const fullNameValidator: ValidatorFn = (control) => {
   const lengthError = trimmedLength(limits.fullName.min, limits.fullName.max)(control);

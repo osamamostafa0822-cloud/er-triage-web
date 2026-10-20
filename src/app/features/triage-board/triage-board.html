@@ -56,8 +56,24 @@
     </div>
   </section>
   <p class="board-note">
-    {{ i18n.messages().boardSnapshotNotice }} {{ i18n.messages().boardArrivalHint }}
+    {{
+      liveState() === 'connected'
+        ? i18n.messages().boardLiveNotice
+        : i18n.messages().boardSnapshotNotice
+    }}
+    {{ i18n.messages().boardArrivalHint }}
+    @if (liveLabel()) {
+      <span class="live-chip" [attr.data-state]="liveState()">{{ liveLabel() }}</span>
+    }
   </p>
+  @if (notice(); as current) {
+    <div class="board-notice" [attr.data-source]="current.source" role="status" aria-live="polite">
+      <p>{{ noticeText() }}</p>
+      <button class="button" type="button" (click)="dismissNotice()">
+        {{ i18n.messages().dismiss }}
+      </button>
+    </div>
+  }
 
   <section
     class="board-results"
@@ -127,6 +143,7 @@
                 <th scope="col">{{ i18n.messages().arrivalTime }}</th>
                 <th scope="col">{{ i18n.messages().boardWaitingDuration }}</th>
                 <th scope="col">{{ i18n.messages().boardStatusFilter }}</th>
+                <th scope="col">{{ i18n.messages().actionsColumn }}</th>
               </tr>
             </thead>
             <tbody>
@@ -162,6 +179,13 @@
                     />
                   </td>
                   <td><app-status-badge [status]="patient.status" /></td>
+                  <td>
+                    <app-patient-row-actions
+                      [patient]="patient"
+                      (statusAction)="openStatusAction(patient, $event)"
+                      (overrideAction)="openOverrideAction(patient)"
+                    />
+                  </td>
                 </tr>
               }
             </tbody>
@@ -219,6 +243,12 @@
                   </dd>
                 </div>
               </dl>
+              <app-patient-row-actions
+                class="card-actions"
+                [patient]="patient"
+                (statusAction)="openStatusAction(patient, $event)"
+                (overrideAction)="openOverrideAction(patient)"
+              />
             </article>
           }
         </div>
@@ -251,4 +281,14 @@
       }
     }
   </section>
+
+  @if (activeAction(); as current) {
+    <app-patient-action-dialog
+      [patient]="current.patient"
+      [action]="current.action"
+      (closed)="closeAction()"
+      (completed)="onActionCompleted($event)"
+      (stale)="onActionStale()"
+    />
+  }
 </div>

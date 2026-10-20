@@ -1,6 +1,6 @@
 import type { PatientStatus, TriagePriority } from './patient';
 
-/** ERTriage.Application/Triage/WaitingLevel.cs. Supplied by the server, never derived in the UI. */
+/** ERTriage.Application/Triage/Waiting/WaitingLevel.cs. Supplied by the server, never derived in the UI. */
 export type WaitingLevel = 'None' | 'Normal' | 'Warning' | 'Critical';
 
 /** ERTriage.Application/Triage/Dtos/TriageBoardItemDto.cs at 332227f. */

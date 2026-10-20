@@ -1,0 +1,147 @@
+<div class="dialog-backdrop" (click)="onBackdrop($event)">
+  <div
+    class="dialog-panel"
+    role="dialog"
+    aria-modal="true"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    [attr.aria-labelledby]="titleId"
+    [attr.aria-busy]="submitting()"
+  >
+    <h3 [id]="titleId">{{ title() }}</h3>
+    <div class="dialog-patient">
+      <strong
+        ><bdi>{{ patient().fullName }}</bdi></strong
+      >
+      <app-priority-badge [priority]="patient().currentPriority" />
+      <app-status-badge [status]="patient().status" />
+    </div>
+
+    @switch (action().kind) {
+      @case ('override') {
+        <form [formGroup]="overrideForm" (ngSubmit)="submit()" novalidate>
+          <p class="dialog-hint">
+            {{ i18n.messages().overrideCalculated }}: P{{ patient().calculatedPriority }} —
+            {{ patient().priorityReason }}
+          </p>
+          <div class="field">
+            <label for="override-priority">{{ i18n.messages().overrideNewPriority }}</label>
+            <select
+              id="override-priority"
+              formControlName="priority"
+              [attr.aria-invalid]="errorFor(overrideForm.controls.priority) ? 'true' : null"
+              [attr.aria-describedby]="
+                errorFor(overrideForm.controls.priority) ? 'override-priority-error' : null
+              "
+            >
+              <option value="" disabled>{{ i18n.messages().selectPriority }}</option>
+              @for (priority of priorities; track priority) {
+                <option [value]="priority">{{ priorityLabel(priority) }}</option>
+              }
+            </select>
+            @if (errorFor(overrideForm.controls.priority); as message) {
+              <p class="field-error" id="override-priority-error">{{ message }}</p>
+            }
+          </div>
+          <div class="field">
+            <label for="override-reason">{{ i18n.messages().overrideReason }}</label>
+            <textarea
+              id="override-reason"
+              rows="3"
+              formControlName="reason"
+              [attr.maxlength]="limits.overrideReason.max"
+              [attr.aria-invalid]="errorFor(overrideForm.controls.reason) ? 'true' : null"
+              [attr.aria-describedby]="
+                'override-reason-hint' +
+                (errorFor(overrideForm.controls.reason) ? ' override-reason-error' : '')
+              "
+            ></textarea>
+            <p class="dialog-hint" id="override-reason-hint">
+              {{ i18n.messages().overrideReasonHint }}
+            </p>
+            @if (errorFor(overrideForm.controls.reason); as message) {
+              <p class="field-error" id="override-reason-error">{{ message }}</p>
+            }
+          </div>
+          <div class="field">
+            <label for="override-by">{{ i18n.messages().overriddenBy }}</label>
+            <input
+              id="override-by"
+              type="text"
+              autocomplete="off"
+              formControlName="overriddenBy"
+              [attr.aria-invalid]="errorFor(overrideForm.controls.overriddenBy) ? 'true' : null"
+            />
+            @if (errorFor(overrideForm.controls.overriddenBy); as message) {
+              <p class="field-error">{{ message }}</p>
+            }
+          </div>
+          <ng-container *ngTemplateOutlet="footer" />
+        </form>
+      }
+      @default {
+        <form [formGroup]="noteForm" (ngSubmit)="submit()" novalidate>
+          @if (needsNote()) {
+            <div class="field">
+              <label for="disposition-note">{{ i18n.messages().dispositionNote }}</label>
+              <textarea
+                id="disposition-note"
+                rows="3"
+                formControlName="note"
+                [attr.maxlength]="limits.dispositionNote.max"
+                [attr.aria-invalid]="errorFor(noteForm.controls.note) ? 'true' : null"
+                [attr.aria-describedby]="
+                  'disposition-note-hint' +
+                  (errorFor(noteForm.controls.note) ? ' disposition-note-error' : '')
+                "
+              ></textarea>
+              <p class="dialog-hint" id="disposition-note-hint">
+                {{
+                  i18n
+                    .messages()
+                    .dispositionNoteHint.replace('{value}', '' + limits.dispositionNote.max)
+                }}
+              </p>
+              @if (errorFor(noteForm.controls.note); as message) {
+                <p class="field-error" id="disposition-note-error">{{ message }}</p>
+              }
+            </div>
+          } @else {
+            <p>{{ i18n.messages().dialogStartTreatmentBody }}</p>
+          }
+          <ng-container *ngTemplateOutlet="footer" />
+        </form>
+      }
+    }
+  </div>
+</div>
+
+<ng-template #footer>
+  @if (failure(); as error) {
+    <div class="dialog-error" role="alert">
+      <p>
+        <strong>{{ i18n.messages().workflowFailed }}</strong>
+      </p>
+      <p>{{ error.message }}</p>
+      @for (entry of error.errors; track $index) {
+        <p>{{ entry.message }}</p>
+      }
+      @if (error.status === 404 || error.status === 409) {
+        <p>{{ i18n.messages().workflowRefreshedHint }}</p>
+      }
+      @if (error.traceId) {
+        <p>
+          {{ i18n.messages().traceId }}: <code dir="ltr">{{ error.traceId }}</code>
+        </p>
+      }
+    </div>
+  }
+  <div class="dialog-footer">
+    <button type="button" class="button" [disabled]="submitting()" (click)="requestClose()">
+      {{ i18n.messages().cancel }}
+    </button>
+    <button type="submit" class="button button-primary" [disabled]="submitting()">
+      {{ submitting() ? i18n.messages().saving : confirmLabel() }}
+    </button>
+  </div>
+</ng-template>

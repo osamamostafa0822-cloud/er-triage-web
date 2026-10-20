@@ -128,7 +128,7 @@ describe('TriageBoard page', () => {
     expect(host.querySelectorAll('tbody th[scope="row"]')).toHaveLength(4);
   });
 
-  it('shows existing override information read-only and does not expose actions', () => {
+  it('shows existing override information from the server next to the row actions', () => {
     respond(
       boardPage([
         boardItem({
@@ -142,7 +142,10 @@ describe('TriageBoard page', () => {
     expect(host.querySelector('tbody app-priority-badge')?.textContent).toContain('P1');
     expect(host.querySelector('.manual-override')?.textContent).toContain('Server override reason');
     expect(host.querySelector('.priority-reason')?.textContent).toBe('Opaque server reason');
-    expect(host.querySelector('tbody button')).toBeNull();
+    // Actions come from the server's allowedTransitions (fixture: Waiting -> InTreatment) plus the override.
+    expect(
+      Array.from(host.querySelectorAll('tbody button')).map((b) => b.textContent?.trim()),
+    ).toEqual(['Start treatment', 'Override priority']);
     expect(host.querySelector('a[routerLink="/register"]')).not.toBeNull();
   });
 

@@ -1,6 +1,6 @@
 # ER Triage Board — Angular frontend
 
-**Current status (2026-10-20): M5 intake and M6.1 read-only board are implemented.** The board has status/priority filters and server pagination; polling/status/override actions remain future phases. Reduced-motion visual verification remains open. Fictional data only; not clinically validated. No authentication.
+**Current status (2026-10-20): M5 intake, the M6.1 board and M6.2 (status/override actions, SignalR live notices) are implemented; M6.2 awaits the owner's Windows build/test.** Run `npm install` once for the new `@microsoft/signalr` dependency. Reduced-motion visual verification remains open. Fictional data only; not clinically validated. No authentication.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ Open http://localhost:4200 for the lazy triage board; /register remains intake a
 - Read-only board using GET /api/triage-board, current priority/reason/status/waiting supplied by the server, local arrival formatting and shared desktop table/mobile cards. Status defaults to the active queue; all statuses are sent explicitly. Priority all/P1–P4 and page sizes 10/25/50/100 use server filtering/paging, with page 1 reset on filter/size change.
 - Superseded GETs cancel; loading/empty/error/explicit retry and out-of-range-page recovery are supported. Language changes re-read the current selection without resetting it. Waiting is a snapshot, not locally advanced.
 
-No board polling, status actions, override dialog, authentication, toast service or frontend priority calculation is implemented.
+No board polling (SignalR notifications replace it, D-79), no authentication, toast service or frontend priority calculation. Status/override actions come from the server's allowed transitions.
 
 ## Current stack and structure
 
@@ -72,4 +72,4 @@ Reduced-motion CSS was inspected, but this browser exposes viewport resizing and
 
 This folder is its own Git repository on main; no remote is configured. backend/ is a separate repository; root docs/SPEC/PROMPTS remain outside both repositories (D-51/D-76). No commit/push was created in F7. Historical verification and decisions are retained in the project progress/AI-decision logs; previous documentation is backed up under _backup/f7-documentation-20261020.
 
-Next: actual reduced-motion visual check and separately approved M6.2 work. Polling/status/override actions are not implemented. CI/final clean-clone delivery remain later work. Preview is available at localhost:4200.
+Next: owner build/test of M6.2, live two-browser SignalR check, actual reduced-motion visual check, then M7 delivery. CI/final clean-clone delivery remain later work. Preview is available at localhost:4200.
