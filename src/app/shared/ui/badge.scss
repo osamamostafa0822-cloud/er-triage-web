@@ -1,0 +1,46 @@
+:host {
+  display: inline-block;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--badge-dot);
+  flex-shrink: 0;
+}
+@for $priority from 1 through 4 {
+  .priority-#{$priority} {
+    background: var(--priority-#{$priority}-bg);
+    color: var(--priority-#{$priority}-fg);
+    border-color: var(--priority-#{$priority}-border);
+    --badge-dot: var(--priority-#{$priority}-dot);
+  }
+}
+.waiting {
+  background: var(--status-waiting-bg);
+  color: var(--status-waiting-fg);
+}
+.in-treatment {
+  background: var(--status-treatment-bg);
+  color: var(--status-treatment-fg);
+}
+.discharged {
+  background: var(--status-discharged-bg);
+  color: var(--status-discharged-fg);
+}
+.admitted {
+  background: var(--status-admitted-bg);
+  color: var(--status-admitted-fg);
+}

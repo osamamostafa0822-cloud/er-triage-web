@@ -1,0 +1,156 @@
+<a class="skip-link button" href="#main-content">{{ i18n.messages().skipContent }}</a>
+<div class="shell" [class.collapsed]="collapsed()">
+  <aside class="sidebar" [attr.aria-label]="i18n.messages().primaryNavigation">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"
+        ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14" /></svg
+      ></span>
+      <span class="brand-name">{{ i18n.messages().appTitle }}</span>
+    </div>
+    <nav class="nav-list" [attr.aria-label]="i18n.messages().primaryNavigation">
+      @for (item of navigation(); track item.label) {
+        @if (item.href !== null) {
+          <a
+            class="nav-item"
+            [routerLink]="item.href"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="item.label"
+            [title]="item.label"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path [attr.d]="item.icon" /></svg
+            ><span>{{ item.label }}</span>
+          </a>
+        } @else {
+          <button
+            class="nav-item"
+            type="button"
+            disabled
+            [attr.aria-label]="item.label"
+            [title]="item.label"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path [attr.d]="item.icon" /></svg
+            ><span>{{ item.label }}</span>
+          </button>
+        }
+      }
+    </nav>
+    <button
+      class="collapse-button"
+      type="button"
+      [attr.aria-expanded]="!collapsed()"
+      [attr.aria-label]="
+        collapsed() ? i18n.messages().expandSidebar : i18n.messages().collapseSidebar
+      "
+      (click)="collapsed.set(!collapsed())"
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+      >
+        <path d="m14 7-5 5 5 5" /></svg
+      ><span>{{ i18n.messages().collapseSidebar }}</span>
+    </button>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <h1>{{ title() }}</h1>
+      <div class="topbar-actions">
+        <div class="clock">
+          <time [attr.datetime]="now().toISOString()">{{ clock() }}</time
+          ><span>{{ date() }}</span>
+        </div>
+        <button
+          type="button"
+          class="button icon-button"
+          [disabled]="!refreshEnabled()"
+          [attr.aria-label]="i18n.messages().refresh"
+          [title]="i18n.messages().refresh"
+          (click)="refresh.emit()"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 7v5h-5M4 17v-5h5" />
+            <path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" />
+          </svg>
+        </button>
+        <label class="language-control"
+          ><span class="visually-hidden">{{ i18n.messages().languageLabel }}</span>
+          <select #language [value]="i18n.language()" (change)="i18n.setLanguage(language.value)">
+            <option value="en" lang="en">English</option>
+            <option value="ar" lang="ar">العربية</option>
+          </select>
+        </label>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <div class="content"><ng-content /></div>
+    </main>
+  </div>
+  <nav class="mobile-nav" [attr.aria-label]="i18n.messages().primaryNavigation">
+    @for (item of navigation(); track item.label) {
+      @if (item.href !== null) {
+        <a
+          class="mobile-item"
+          [routerLink]="item.href"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+          >
+            <path [attr.d]="item.icon" /></svg
+          ><span>{{ item.label }}</span>
+        </a>
+      } @else {
+        <button class="mobile-item" type="button" disabled>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+          >
+            <path [attr.d]="item.icon" /></svg
+          ><span>{{ item.label }}</span>
+        </button>
+      }
+    }
+  </nav>
+</div>

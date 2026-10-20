@@ -1,0 +1,237 @@
+/* Shared primitives: use in the real feature pages, without duplicating markup or data models. */
+.surface,
+.form-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.surface-heading,
+.form-section {
+  padding: var(--space-5);
+}
+.surface-heading {
+  border-block-end: 1px solid var(--color-border);
+}
+.surface-heading h2,
+.form-section h2 {
+  margin: 0 0 var(--space-1);
+  font-size: 16px;
+  font-weight: 650;
+}
+.surface-heading p,
+.form-section > p {
+  color: var(--color-muted);
+  margin: 0 0 var(--space-4);
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 600;
+}
+.button:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+.button-primary {
+  background: var(--color-teal);
+  color: #fff;
+  border-color: var(--color-teal);
+}
+.button-primary:hover:not(:disabled) {
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+}
+.icon-button {
+  width: var(--control-height);
+  padding: 0;
+}
+
+/* Board columns: name, age, chief complaint, priority, arrived, waiting, status, actions. */
+.board-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-card);
+}
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  th {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg);
+    color: var(--color-muted);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  td {
+    padding: var(--space-4);
+    border-block-start: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+  td:first-child {
+    font-weight: 600;
+  }
+  th,
+  td {
+    text-align: start;
+  }
+  tr[data-priority='1'] {
+    background: #fff9f9;
+  }
+  tr[data-priority='1'] td:first-child {
+    box-shadow: inset 4px 0 var(--priority-1-dot);
+  }
+  tr[data-priority='2'] td:first-child {
+    box-shadow: inset 4px 0 var(--priority-2-dot);
+  }
+}
+.manual-override {
+  display: block;
+  margin-block-start: var(--space-1);
+  color: var(--color-muted);
+  font-size: 12px;
+}
+:dir(rtl) .board-table tr[data-priority='1'] td:first-child {
+  box-shadow: inset -4px 0 var(--priority-1-dot);
+}
+:dir(rtl) .board-table tr[data-priority='2'] td:first-child {
+  box-shadow: inset -4px 0 var(--priority-2-dot);
+}
+.board-cards {
+  display: none;
+}
+.board-card {
+  padding: var(--space-4);
+  border-inline-start: 4px solid transparent;
+  &[data-priority='1'] {
+    border-inline-start-color: var(--priority-1-dot);
+  }
+  &[data-priority='2'] {
+    border-inline-start-color: var(--priority-2-dot);
+  }
+}
+.board-card-heading,
+.board-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.board-card dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+.board-card dt {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.board-card dd {
+  margin: 0;
+}
+
+/* Section cards: Patient information / Vital signs / Manual priority override. */
+.registration-form {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 960px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.field {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.field-wide {
+  grid-column: 1 / -1;
+}
+.field label {
+  font-weight: 600;
+  font-size: 13px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+.field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+.field [aria-invalid='true'] {
+  border-color: var(--priority-1-dot);
+}
+.field-error {
+  color: var(--priority-1-fg);
+  font-size: 12px;
+  margin: 0;
+}
+.field-with-unit {
+  position: relative;
+}
+.field-with-unit input {
+  padding-inline-end: 68px;
+  font-variant-numeric: tabular-nums;
+}
+.field-unit {
+  position: absolute;
+  inset-inline-end: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+  font-size: 12px;
+  pointer-events: none;
+}
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (max-width: 767px) {
+  .board-table-wrap {
+    display: none;
+  }
+  .board-cards {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-section {
+    padding: var(--space-4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
